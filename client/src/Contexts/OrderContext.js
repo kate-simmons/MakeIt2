@@ -5,18 +5,8 @@ import {
   useContext,
   useEffect,
 } from "react";
-import db from "../firebaseinit";
-import {
-  collection,
-  getDoc,
-  getDocs,
-  doc,
-  updateDoc,
-  arrayUnion,
-} from "firebase/firestore";
 import { auth } from "../firebaseinit";
 import { useValue } from "./AuthContext";
-import { useNavigate } from "react-router-dom";
 
 const orderContext = createContext();
 
@@ -55,26 +45,37 @@ function OrderContext({ children }) {
   const { SignedIn } = useValue();
   const currentUser = auth.currentUser; //current Signed In user, if no one then it will be Null
 
-  // function to update orders in database as new order is added
-  const addOrderToDatabase = async (newOrder) => {
-    await updateDoc(doc(db, currentUser.uid, "Orders"), {
-      myorders: arrayUnion(newOrder),
-    });
-  };
-
   // function to add new order
-  const addOrder = () => {
+  const addOrder = async () => {
     const date = String(new Date()).substring(0, 15);
     const newOrder = {
       date: `${date.slice(3)}, ${date.substring(0, 3)}`,
       cartItems: cart,
-      totalPrice: TotalPrice+3,
+      totalPrice: TotalPrice,
     };
 
-    addOrderToDatabase(newOrder);
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_SERVER_URL}/api/user/placeOrder`,
+        {
+          method: "Post",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            data: newOrder,
+            id: SignedIn,
+          }),
+        }
+      );
+      const res = await response.json();
+      console.log(res);
+    } catch (err) {
+      console.log("Error while placing order : ", err.message);
+    }
     setOrders({ type: "ADD_ORDER", payload: { order: newOrder } });
     setCart({ type: "EMPTY", payload: {} });
-    
+
     console.log(orders);
   };
 
@@ -87,7 +88,7 @@ function OrderContext({ children }) {
       const item = Products[data.type].find((item) => item.id === data.id);
       setCart({ type: "ADD_ITEM", payload: { ...item, qty: 1 } });
       try {
-        await fetch("http://localhost:4100/api/user/addToCart", {
+        await fetch(`${process.env.REACT_APP_SERVER_URL}/api/user/addToCart`, {
           method: "Post",
           headers: {
             "Content-Type": "application/json",
@@ -119,16 +120,19 @@ function OrderContext({ children }) {
     console.log(id);
     setCart({ type: "UPDATE_ALL", payload: { arr: arr } });
     try {
-      await fetch("http://localhost:4100/api/user/removeFromCart", {
-        method: "Post",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: id,
-          uid: SignedIn,
-        }),
-      });
+      await fetch(
+        `${process.env.REACT_APP_SERVER_URL}/api/user/removeFromCart`,
+        {
+          method: "Post",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: id,
+            uid: SignedIn,
+          }),
+        }
+      );
       return "item removed";
     } catch (err) {
       console.log("Error while removing item from cart: ", err.message);
@@ -146,7 +150,7 @@ function OrderContext({ children }) {
 
     setCart({ type: "UPDATE_ALL", payload: { arr: arr } });
     try {
-      await fetch("http://localhost:4100/api/user/increaseQty", {
+      await fetch(`${process.env.REACT_APP_SERVER_URL}/api/user/increaseQty`, {
         method: "Post",
         headers: {
           "Content-Type": "application/json",
@@ -174,7 +178,7 @@ function OrderContext({ children }) {
 
     setCart({ type: "UPDATE_ALL", payload: { arr: arr } });
     try {
-      await fetch("http://localhost:4100/api/user/decreaseQty", {
+      await fetch(`${process.env.REACT_APP_SERVER_URL}/api/user/decreaseQty`, {
         method: "Post",
         headers: {
           "Content-Type": "application/json",
@@ -199,19 +203,21 @@ function OrderContext({ children }) {
     setTotalPrice(tot);
   }, [cart]);
 
-  useEffect(() => {
-    console.log(Products);
-  }, [Products]);
-
   //Fetching products from database
   useEffect(() => {
     async function fetchProducts() {
       const resbrkfst = await fetch(
-        "http://localhost:4100/api/product/breakfast"
+        `${process.env.REACT_APP_SERVER_URL}/api/product/breakfast`
       );
-      const reslunch = await fetch("http://localhost:4100/api/product/lunch");
-      const resdinner = await fetch("http://localhost:4100/api/product/dinner");
-      const ressnacks = await fetch("http://localhost:4100/api/product/snacks");
+      const reslunch = await fetch(
+        `${process.env.REACT_APP_SERVER_URL}/api/product/lunch`
+      );
+      const resdinner = await fetch(
+        `${process.env.REACT_APP_SERVER_URL}/api/product/dinner`
+      );
+      const ressnacks = await fetch(
+        `${process.env.REACT_APP_SERVER_URL}/api/product/snacks`
+      );
       const breakfast = await resbrkfst.json();
       const dinner = await resdinner.json();
       const lunch = await reslunch.json();
@@ -231,28 +237,31 @@ function OrderContext({ children }) {
   // fetching users data as user signed In
   useEffect(() => {
     async function fetchMyData() {
-      const orderData = await getDoc(doc(db, currentUser.uid, "Orders"));
-      if (orderData && orderData.data()) {
+      // const orderData = await getDoc(doc(db, currentUser.uid, "Orders"));
+      const response = await fetch(
+        `http://localhost:4100/api/user/getUserData/${SignedIn}`
+      );
+      const userdata = await response.json();
+      console.log("userdata: ", userdata);
+      if (userdata.status) {
         setOrders({
           type: "UPDATE_ALL",
-          payload: { arr: orderData.data().myorders },
+          payload: { arr: userdata.data.orders },
         });
-      }
-      const cartData = await getDoc(doc(db, currentUser.uid, "Cart"));
-      if (cartData && cartData.data()) {
+
         setCart({
           type: "UPDATE_ALL",
-          payload: { arr: cartData.data().mycart },
+          payload: { arr: userdata.data.cart },
         });
       }
       setIsLoading(false);
     }
 
-    if (currentUser) {
+    if (SignedIn) {
       setIsLoading(true);
       fetchMyData();
     }
-  }, [currentUser]);
+  }, [SignedIn]);
 
   return (
     <orderContext.Provider

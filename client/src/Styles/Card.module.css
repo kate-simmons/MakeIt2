@@ -30,7 +30,7 @@
 }
 
 .button {
-  height: 50px;
+  height: 40px;
   width: 100%;
   text-align: center;
   border-radius: 5px;
@@ -78,7 +78,7 @@
 }
 
 .removeBtn {
-  margin-top: 10px;
+  margin-top: 20px;
   background-color: #f14444;
   outline: 1.5px solid red;
 }

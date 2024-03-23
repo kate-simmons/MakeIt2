@@ -17,7 +17,7 @@ function SignIn() {
     const p = passwordRef.current.value.trim();
 
     const res = await signIn(e, p);
-    console.log(res);
+
     if (res === "success") {
       toast.success("User Signed In");
       navigate("/", { replace: true });

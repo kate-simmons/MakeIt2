@@ -134,8 +134,26 @@ export default class UserRepository {
     }
   }
 
-  async placeOrder(data) {
+  async emptyCart(id) {
     try {
+      await updateDoc(doc(db, this.collection, id), {
+        cart: [],
+      });
+      return { status: true, msg: "cart emptied" };
+    } catch (err) {
+      return { status: false, err: err.message };
+    }
+  }
+
+  async placeOrder({ id, data }) {
+    try {
+      const res = await getDoc(doc(db, this.collection, id));
+      const response = res.data();
+      await updateDoc(doc(db, this.collection, id), {
+        orders: [...response.orders, data],
+      });
+      await this.emptyCart(id);
+      return { status: true, msg: "cart emptied" };
     } catch (err) {
       return { status: false, err: err.message };
     }

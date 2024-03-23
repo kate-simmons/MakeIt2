@@ -4,7 +4,7 @@ import { useOrderValue } from "../Contexts/OrderContext";
 import Card from "../Components/Card";
 import { Circles } from "react-loader-spinner";
 function Dinner() {
-  const { search, setSearch } = useState();
+  const [search, setSearch] = useState();
   const { Products, isLoading } = useOrderValue();
 
   if (!Products.dinner) {
@@ -27,9 +27,15 @@ function Dinner() {
         />
       </div>
       <div className={style.cardsContainer}>
-        {Products.dinner.map((item, index) => (
-          <Card product={item} key={index} search={search} item="dinner" />
-        ))}
+        {Products.dinner.map((item, index) => {
+          if (search) {
+            if (item.name.toLowerCase().includes(search.trim().toLowerCase())) {
+              return <Card product={item} key={index} item="dinner" />;
+            } else return null;
+          } else {
+            return <Card product={item} key={index} item="dinner" />;
+          }
+        })}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useOrderValue } from "../Contexts/OrderContext";
 import style from "../Styles/cart.module.css";
+import { toast } from "react-toastify";
 
 // This component if part of "Cart" page, it contains the information about totalPrice of cart items and the button to purchase cartItems
 function TotalPrice() {
@@ -9,6 +10,7 @@ function TotalPrice() {
   //this funciton invokes when Purchase button is pressed, it places a new order
   const handleOrder = () => {
     addOrder();
+    toast.success("Order placed successfully");
     navigate("/Orders");
   };
 

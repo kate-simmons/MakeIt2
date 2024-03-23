@@ -16,7 +16,7 @@ userRouter.post("/signout", (req, res) => {
   usercontrol.signOut(req, res);
 });
 
-userRouter.get("/getUserData", (req, res) => {
+userRouter.get("/getUserData/:id", (req, res) => {
   usercontrol.getUserData(req, res);
 });
 
@@ -37,4 +37,9 @@ userRouter.post("/increaseQty", (req, res) => {
 userRouter.post("/decreaseQty", (req, res) => {
   usercontrol.decreaseQty(req, res);
 });
+
+userRouter.post("/emptyCart", (req, res) => {
+  usercontrol.emptyCart(req, res);
+});
+
 export default userRouter;

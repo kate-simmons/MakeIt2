@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import style from "../Styles/Home.module.css";
-import FilterComp from "../Components/Filter";
 import Card from "../Components/Card";
 import { useOrderValue } from "../Contexts/OrderContext";
 import { Circles } from "react-loader-spinner";
@@ -8,7 +7,6 @@ import Carousel from "../Components/Carousel";
 
 function Home() {
   const { Products, isLoading } = useOrderValue(); // states from orderContext
-  const [FilterCategory, setFilterCategory] = useState([]);
   const [search, setSearch] = useState("");
 
   return (
@@ -19,20 +17,25 @@ function Home() {
           <input
             placeholder="Search..."
             className={`${style.input} w-[100%] shadow-xl`}
-            // onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <div className="bg-gray-200  rounded-xl">
           <div className={style.cardsContainer}>
             {Products.snacks ? (
-              Products.snacks.map((item, index) => (
-                <Card
-                  product={item}
-                  key={index}
-                  search={search}
-                  item="snacks"
-                />
-              ))
+              Products.snacks.map((item, index) => {
+                if (search) {
+                  if (
+                    item.name
+                      .toLowerCase()
+                      .includes(search.trim().toLowerCase())
+                  ) {
+                    return <Card product={item} key={index} item="snacks" />;
+                  } else return null;
+                } else {
+                  return <Card product={item} key={index} item="snacks" />;
+                }
+              })
             ) : (
               <div className={style.spinnerDiv}>
                 <Circles color="#6e62e1" />

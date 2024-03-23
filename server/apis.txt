@@ -3,9 +3,11 @@ cart
 = increasequantity - doen
 = decreasequantity - done
 = removefromcart - done
-= empty cart
-= fetchcart
+= empty cart - done
+
 
 order
 = placeorder
-= fetchorder
+
+
+->fetch userdata -> cart + order

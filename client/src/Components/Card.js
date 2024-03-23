@@ -1,39 +1,16 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useValue } from "../Contexts/AuthContext";
 import style from "../Styles/Card.module.css";
 import { useOrderValue } from "../Contexts/OrderContext";
 import { toast } from "react-toastify";
+import { useValue } from "../Contexts/AuthContext";
 
 //Two cards are defined here,
 
 // A) This is the card for products on homepage
-function Card({ product, search, item }) {
+function Card({ product, item }) {
   const { SignedIn } = useValue();
-  const navigate = useNavigate();
-  const { addToCart } = useOrderValue();
-
-  // const handleAddToCart = (id) => {
-  //   if (!SignedIn) {
-  //     navigate("SignIn", { replace: true });
-  //   } else {
-  //     const res = addToCart(id);
-  //     if (res === "updated") {
-  //       toast.success("Increased product count");
-  //     } else {
-  //       toast.success("Product added to cart");
-  //     }
-  //   }
-  // };
-
-  //search is a state defined in parent component, here it is used to filter out the searched component. If search is empty than return every component
-  // Else check if the item description includes the searched text or not, if it includes the searched text return it, else return Null.
-  if (search?.length) {
-    const str = search.trim().toLowerCase();
-    if (!product.Description.toLowerCase().includes(str)) return null;
-  }
-
   return (
-    <div class="w-3/12 max-w-sm  rounded-lg shadow bg-gray-800 border-gray-700">
+    <div class="w-[310px] max-w-sm  rounded-lg shadow bg-gray-800 border-gray-700">
       <a href="#">
         <img
           class="p-8 rounded-t-lg"
@@ -97,7 +74,7 @@ function Card({ product, search, item }) {
             </svg>
           </div>
           <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800 ms-3">
-            5.0
+            4.0
           </span>
         </div>
         <div class="flex items-center justify-between">
@@ -105,7 +82,7 @@ function Card({ product, search, item }) {
             Rs. {product.price}
           </span>
           <Link
-            to={`/${item}/details/${product.id}`}
+            to={SignedIn ? `/${item}/details/${product.id}` : "/signin"}
             class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
           >
             View Recipe
