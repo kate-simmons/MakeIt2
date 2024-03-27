@@ -45,7 +45,8 @@ function Authentication({ children }) {
         }
       );
       const res = await response.json();
-      localStorage.setItem("uid", res.data.id);
+      console.log(res);
+      localStorage.setItem("uid", res.data.userid);
       setSignedIn(true);
       return "success";
     } catch (error) {

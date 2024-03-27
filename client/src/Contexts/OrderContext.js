@@ -51,7 +51,7 @@ function OrderContext({ children }) {
     const newOrder = {
       date: `${date.slice(3)}, ${date.substring(0, 3)}`,
       cartItems: cart,
-      totalPrice: TotalPrice,
+      totalPrice: TotalPrice + 3,
     };
 
     try {
@@ -243,7 +243,7 @@ function OrderContext({ children }) {
       );
       const userdata = await response.json();
       console.log("userdata: ", userdata);
-      if (userdata.status) {
+      if (userdata.status && userdata.data) {
         setOrders({
           type: "UPDATE_ALL",
           payload: { arr: userdata.data.orders },

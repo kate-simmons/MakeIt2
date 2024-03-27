@@ -7,6 +7,71 @@ import { toast } from "react-toastify";
 function TotalPrice() {
   const { TotalPrice, addOrder } = useOrderValue();
   const navigate = useNavigate();
+
+  const paymentHandler = async (e) => {
+    const amount = TotalPrice + 3;
+    const currency = "INR";
+    const receipt = "qwsaqi";
+    const response = await fetch(
+      `${process.env.REACT_APP_SERVER_URL}/api/user/orders`,
+      {
+        method: "Post",
+        body: JSON.stringify({
+          amount: amount,
+          receipt: receipt,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const order = await response.json();
+
+    var options = {
+      key: "rzp_test_tSTYAFl1yflTl1", // Enter the Key ID generated from the Dashboard
+      amount: TotalPrice + 3, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+      currency: currency,
+      name: "Make-It", //your business name
+      description: "Test Transaction",
+      image: "https://cdn-icons-png.flaticon.com/128/3170/3170733.png",
+      order_id: order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+      handler: async function (res) {
+        const response = await fetch(
+          `${process.env.REACT_APP_SERVER_URL}/api/user/order/validate`,
+          {
+            method: "Post",
+            body: JSON.stringify(res),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const data = await response.json();
+        handleOrder();
+      },
+      notes: {
+        address: "Razorpay Corporate Office",
+      },
+      theme: {
+        color: "#3399cc",
+      },
+    };
+
+    var rzp1 = new window.Razorpay(options);
+    rzp1.on("payment.failed", function (response) {
+      alert(response.error.code);
+      alert(response.error.description);
+      alert(response.error.source);
+      alert(response.error.step);
+      alert(response.error.reason);
+      alert(response.error.metadata.order_id);
+      alert(response.error.metadata.payment_id);
+    });
+
+    rzp1.open();
+    e.preventDefault();
+  };
   //this funciton invokes when Purchase button is pressed, it places a new order
   const handleOrder = () => {
     addOrder();
@@ -33,7 +98,10 @@ function TotalPrice() {
         <p>Grand Total:-</p> <p>₹{TotalPrice + 3}/-</p>
       </h3>
       <div className="w-10/12 mx-auto">
-        <button className={`${style.btn} font-semibold `} onClick={handleOrder}>
+        <button
+          className={`${style.btn} font-semibold `}
+          onClick={paymentHandler}
+        >
           Place Order
         </button>
       </div>

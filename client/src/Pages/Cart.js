@@ -8,7 +8,6 @@ function Cart() {
   // cart contains all cartitems with their quantity, description, price...
   const { cart } = useOrderValue();
 
-  console.log(cart);
   // if cart is empty this will be returned
   if (cart.length === 0) {
     return (
