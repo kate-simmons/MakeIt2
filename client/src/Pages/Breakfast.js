@@ -26,7 +26,7 @@ function Breakfast() {
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
-      <div className={style.cardsContainer}>
+      <div className="flex flex-wrap justify-evenly">
         {Products.breakfast.map((item, index) => {
           if (search) {
             if (item.name.toLowerCase().includes(search.trim().toLowerCase())) {

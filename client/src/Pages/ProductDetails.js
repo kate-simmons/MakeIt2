@@ -5,33 +5,66 @@ import style from "../Styles/Home.module.css";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useValue } from "../Contexts/AuthContext";
+import { useState } from "react";
+
 function ProductDetails() {
   const { Products, addToCart } = useOrderValue();
   const { item, id } = useParams();
   const { SignedIn } = useValue();
   const navigate = useNavigate();
+  let ingreds = [];
   const product = Products[item]?.find((i) => i.id === id);
+  const list = Object.keys(product.ingredients).map((key, k) => {
+    const arr = product.ingredients[key];
+    ingreds = [...ingreds, ...arr];
+    return arr;
+  });
+
+  const obj = {};
+  for (let i in ingreds) {
+    obj[i] = false;
+  }
+
+  const [checkboxes, setCheckboxes] = useState(obj);
+  const [packet, setPacket] = useState(false);
+
+  const handleCheck = (e, index) => {
+    setCheckboxes({ ...checkboxes, [index]: !checkboxes[index] });
+  };
+
+  const handlePacket = () => {
+    if (packet) setPacket(false);
+    else setPacket(true);
+  };
+
+  const handleSelectall = (e) => {
+    for (let i in ingreds) {
+      if (e.target.checked) obj[i] = true;
+      else obj[i] = false;
+    }
+    setCheckboxes(obj);
+  };
+
   const handleSubmit = async (e, id) => {
     e.preventDefault();
     if (!SignedIn) {
       navigate("/signin");
     } else {
-      const check1 = e.target.input1.checked;
-      const check2 = e.target.input2.checked;
-      let data = { id: id, type: item };
-      if (check1) {
-        data = { ...data, salad: true };
+      let data = { id: id, type: item, selected: [], packet: false };
+      if (packet) {
+        data.packet = true;
       }
-      if (check2) {
-        data = { ...data, cutlery: true };
+      for (let i in ingreds) {
+        if (checkboxes[i]) {
+          data.selected = [...data.selected, ingreds[i]];
+        }
       }
-
+      // console.log(data);
       await addToCart(data);
       toast.success("Item added to cart");
-      e.target.input1.checked = false;
-      e.target.input2.checked = false;
     }
   };
+
   if (product) {
     return (
       <div className="poppins">
@@ -106,30 +139,52 @@ function ProductDetails() {
           {/* checkouts */}
         </section>
         <form onSubmit={(e) => handleSubmit(e, product.id)}>
-          <div className="w-4/12 mx-auto px-10 py-2 rounded-xl bg-gray-200 ">
-            <div class="flex items-center mb-4">
+          <div className="w-5/12 mx-auto px-10 py-2 rounded-xl bg-gray-200 ">
+            <div className="flex items-center mb-4 border-b border-dashed border-gray-700 pb-2">
               <input
-                id="default-checkbox"
+                id={`selectall`}
                 type="checkbox"
-                name="input1"
-                value="Salad"
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500  focus:ring-2 "
+                name="selectall"
+                value="selectall"
+                onChange={handleSelectall}
+                className="w-[16px] h-[20px] text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500  focus:ring-2 "
               />
-              <label for="default-checkbox" class="ms-2 text-sm font-medium ">
-                Salad
+              <label for={`selectall`} className="ms-2 text-md font-semibold ">
+                Select All Ingredients
               </label>
             </div>
-
-            <div class="flex items-center">
+            {ingreds.map((ing, index) => (
+              <div className="flex items-center mb-4">
+                <input
+                  id={`default-checkbox${index}`}
+                  type="checkbox"
+                  name={`input${index}`}
+                  onClick={(e) => handleCheck(e, index)}
+                  value={ing}
+                  className="w-[16px] h-[20px] text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500  focus:ring-2 "
+                />
+                <label
+                  for={`default-checkbox${index}`}
+                  className="ms-2 text-sm font-medium "
+                >
+                  {ing}
+                </label>
+              </div>
+            ))}
+            <div className="flex items-center mb-4 border-t border-dashed border-gray-700 pt-2">
               <input
-                id="checked-checkbox"
+                id={`productpacket`}
                 type="checkbox"
-                name="input2"
-                value="Cutlery"
-                class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 "
+                name="productpacket"
+                value="productpacket"
+                onChange={handlePacket}
+                className="w-[16px] h-[20px] text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500  focus:ring-2 "
               />
-              <label for="checked-checkbox" class="ms-2 text-sm font-medium  ">
-                Cutlery
+              <label
+                for={`productpacket`}
+                className="ms-2 text-sm font-semibold "
+              >
+                {product.name} packet (1 serving)
               </label>
             </div>
           </div>

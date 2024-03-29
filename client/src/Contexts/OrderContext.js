@@ -40,20 +40,21 @@ function OrderContext({ children }) {
   const [orders, setOrders] = useReducer(orderReducer, []);
   const [cart, setCart] = useReducer(cartReducer, []);
   const [Products, setProducts] = useState({});
+  const [allProducts, setAllProducts] = useState([]);
   const [TotalPrice, setTotalPrice] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const { SignedIn } = useValue();
   const currentUser = auth.currentUser; //current Signed In user, if no one then it will be Null
 
   // function to add new order
-  const addOrder = async () => {
+  const addOrder = async (address) => {
     const date = String(new Date()).substring(0, 15);
     const newOrder = {
       date: `${date.slice(3)}, ${date.substring(0, 3)}`,
       cartItems: cart,
       totalPrice: TotalPrice + 3,
+      address: address,
     };
-
     try {
       const response = await fetch(
         `${process.env.REACT_APP_SERVER_URL}/api/user/placeOrder`,
@@ -69,14 +70,11 @@ function OrderContext({ children }) {
         }
       );
       const res = await response.json();
-      console.log(res);
     } catch (err) {
       console.log("Error while placing order : ", err.message);
     }
     setOrders({ type: "ADD_ORDER", payload: { order: newOrder } });
     setCart({ type: "EMPTY", payload: {} });
-
-    console.log(orders);
   };
 
   //If item is not present in cart -> Add it to cart, else increase its quantity (qty)
@@ -86,7 +84,16 @@ function OrderContext({ children }) {
       return "updated";
     } else {
       const item = Products[data.type].find((item) => item.id === data.id);
-      setCart({ type: "ADD_ITEM", payload: { ...item, qty: 1 } });
+      setCart({
+        type: "ADD_ITEM",
+        payload: {
+          ...item,
+          packet: data.packet,
+          selected: data.selected,
+          qty: 1,
+        },
+      });
+
       try {
         await fetch(`${process.env.REACT_APP_SERVER_URL}/api/user/addToCart`, {
           method: "Post",
@@ -117,7 +124,7 @@ function OrderContext({ children }) {
       }
       return true;
     });
-    console.log(id);
+
     setCart({ type: "UPDATE_ALL", payload: { arr: arr } });
     try {
       await fetch(
@@ -223,6 +230,13 @@ function OrderContext({ children }) {
       const lunch = await reslunch.json();
       const snacks = await ressnacks.json();
       // console.log(breakfast, dinner, lunch, snacks);
+
+      setAllProducts([
+        ...breakfast.data,
+        ...lunch.data,
+        ...snacks.data,
+        ...dinner.data,
+      ]);
       setProducts({
         breakfast: breakfast.data,
         lunch: lunch.data,
@@ -239,7 +253,7 @@ function OrderContext({ children }) {
     async function fetchMyData() {
       // const orderData = await getDoc(doc(db, currentUser.uid, "Orders"));
       const response = await fetch(
-        `http://localhost:4100/api/user/getUserData/${SignedIn}`
+        `${process.env.REACT_APP_SERVER_URL}/api/user/getUserData/${SignedIn}`
       );
       const userdata = await response.json();
       console.log("userdata: ", userdata);
@@ -279,6 +293,7 @@ function OrderContext({ children }) {
         addOrder,
         orders,
         isLoading,
+        allProducts,
       }}
     >
       {children}

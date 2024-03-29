@@ -69,19 +69,19 @@ export async function SendEmail(email, bill) {
       </style>
     </head>
     <body>
-      <div class="container">
-        <div class="header">
+      <div className="container">
+        <div className="header">
          
         </div>
-        <div class="content">
-          <p class="thank-you">Thank you for choosing Make-It!</p>
-          <p class="message">
+        <div className="content">
+          <p className="thank-you">Thank you for choosing Make-It!</p>
+          <p className="message">
             <br>
               Date : ${bill.date}
             <br>
            Your total bill is : ${bill.total} rs.
           </p>
-          <a class="button" href="https://makeit.com/">Click Here To Visit your Make-It Account</a>
+          <a className="button" href="https://makeit.com/">Click Here To Visit your Make-It Account</a>
         </div>
       </div>
     </body>

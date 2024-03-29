@@ -25,7 +25,7 @@ function Lunch() {
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
-      <div className={style.cardsContainer}>
+      <div className="flex flex-wrap justify-evenly">
         {Products.lunch.map((item, index) => {
           if (search) {
             if (item.name.toLowerCase().includes(search.trim().toLowerCase())) {

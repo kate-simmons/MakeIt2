@@ -6,7 +6,7 @@ import { Circles } from "react-loader-spinner";
 import Carousel from "../Components/Carousel";
 
 function Home() {
-  const { Products, isLoading } = useOrderValue(); // states from orderContext
+  const { Products, isLoading, allProducts } = useOrderValue(); // states from orderContext
   const [search, setSearch] = useState("");
 
   return (
@@ -21,21 +21,23 @@ function Home() {
           />
         </div>
         <div className="bg-gray-200  rounded-xl">
-          <div className={style.cardsContainer}>
+          <div className="flex flex-wrap justify-evenly">
             {Products.snacks ? (
-              Products.snacks.map((item, index) => {
-                if (search) {
+              search ? (
+                allProducts.map((item, index) => {
                   if (
                     item.name
                       .toLowerCase()
                       .includes(search.trim().toLowerCase())
                   ) {
-                    return <Card product={item} key={index} item="snacks" />;
+                    return <Card product={item} key={index} item={item.type} />;
                   } else return null;
-                } else {
+                })
+              ) : (
+                Products.snacks.map((item, index) => {
                   return <Card product={item} key={index} item="snacks" />;
-                }
-              })
+                })
+              )
             ) : (
               <div className={style.spinnerDiv}>
                 <Circles color="#6e62e1" />

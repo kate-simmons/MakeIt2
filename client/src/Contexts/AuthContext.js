@@ -13,7 +13,6 @@ function getError(error) {
 function Authentication({ children }) {
   const [SignedIn, setSignedIn] = useState(false);
 
-  console.log(process.env.REACT_APP_SERVER_URL);
   // function to signout the current signed in user
   const signOut = async () => {
     try {
@@ -45,7 +44,7 @@ function Authentication({ children }) {
         }
       );
       const res = await response.json();
-      console.log(res);
+
       localStorage.setItem("uid", res.data.userid);
       setSignedIn(true);
       return "success";
